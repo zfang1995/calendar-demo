@@ -160,20 +160,23 @@ export default {
         let calendarSlider = this.calendarSlider;
         if (val && val !== this.cbe) {
           // 从收缩到展开
-          let targetIndex = this.slidesOfWeekView[calendarSlider.realIndex].data
+          let targetIndex = this.slidesOfWeekView[this.currentSlideIndex].data
             .attrs.expandTo;
+          this.currentSlideIndex = targetIndex;
+          window.console.log(targetIndex);
           this.$nextTick(function() {
             setTimeout(() => {
-              calendarSlider.slideTo(targetIndex, 0);
+              calendarSlider.slideTo(targetIndex, 0, false);
             }, 0);
           });
         } else if (!val && val !== this.cbe) {
           // 从展开到收缩
-          let targetIndex = this.slidesOfMonthView[calendarSlider.realIndex]
-            .data.attrs.shrinkTo;
+          let targetIndex = this.slidesOfMonthView[this.currentSlideIndex].data
+            .attrs.shrinkTo;
+          this.currentSlideIndex = targetIndex;
           this.$nextTick(function() {
             setTimeout(() => {
-              calendarSlider.slideTo(targetIndex, 0);
+              calendarSlider.slideTo(targetIndex, 0, false);
             }, 0);
           });
         }
@@ -187,18 +190,20 @@ export default {
     slidesOfWeekView() {
       let monthCounter = 0;
       return this.calendarTableRows.map((e, i) => {
-        if (e.data.isLastRowAtMonthView) monthCounter++;
         let days = e.data.attrs.days;
-        return (
+        let slide = (
           <swiper-slide
             class="slide"
             key={i}
             expandTo={monthCounter}
             days={days}
+            title={Object.values(days)[0].moment.format("YYYY-M")}
           >
             {e}
           </swiper-slide>
         );
+        if (e.data.isLastRowAtMonthView) monthCounter++;
+        return slide;
       });
     },
     slidesOfMonthView() {
@@ -234,7 +239,11 @@ export default {
       );
     },
     _calendarTitle() {
-      return this.slidesOfMonthView[this.currentSlideIndex].data.attrs.title;
+      if (this.calendarBeenExpanded) {
+        return this.slidesOfMonthView[this.currentSlideIndex].data.attrs.title;
+      } else {
+        return this.slidesOfWeekView[this.currentSlideIndex].data.attrs.title;
+      }
     }
   },
   created() {
@@ -261,7 +270,7 @@ export default {
           let offset = this.calendarBeenExpanded
             ? this.slidesOfMonthView.length - original_slidesOfMonthViewLength
             : this.slidesOfWeekView.length - original_slidesOfWeekViewLength;
-          this.calendarSlider.slideTo(original_index + offset, 0);
+          this.calendarSlider.slideTo(original_index + offset, 0, false);
           this.currentSlideIndex = original_index + offset;
         });
       } else {
