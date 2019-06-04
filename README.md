@@ -1,5 +1,5 @@
 # calendar-demo
-查看地址：https://zfang1995.github.io/calendar-demo/
+线上运行效果：https://zfang1995.github.io/calendar-demo/
 ## 主要功能
  * 展示日历
  * 展示特定日期中的事件
